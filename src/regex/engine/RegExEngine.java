@@ -15,8 +15,6 @@ public class RegExEngine extends Thread
     
     public boolean parseStringRegexEngine()
     {
-        Stack stack = new Stack();
-        
         //Parse the Regular Expression
         int index = 0;
         int indexTestString = 0;
@@ -64,10 +62,7 @@ public class RegExEngine extends Thread
             
             //If start of character class '['
             if(ch == '[')
-            {
-                stack.push(index);
-                stack.push('[');
-                
+            {                
                 //Get all the elements in the character class
                 index++;
                 ch = regex.charAt(index);
@@ -245,6 +240,180 @@ public class RegExEngine extends Thread
                 
             }
             
+            //Group checks
+            
+            //If start of character class '['
+            if(ch == '(')
+            {                
+                //Get all the elements in the character class
+                index++;
+                ch = regex.charAt(index);
+                
+                while(ch != ')')
+                {
+                    group += ch;
+                    index++;
+                    ch = regex.charAt(index);
+                }
+                
+                //Check if there is no input remaing
+                if(index == (regex.length() - 1))
+                {
+                    //Check if any single character occured
+                    char testStringChar = test.charAt(indexTestString);
+                    indexTestString++;
+                    for(int i = 0; i < group.length(); i++)
+                    {
+                        if(testStringChar != group.charAt(i))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    //Check if there is closure symbol in the end
+                    index++;
+                    ch = regex.charAt(index);
+                    int testStringStartIndex = indexTestString;
+                    
+                    if(ch == '*')
+                    {
+                        boolean finished = false;
+                        while(!finished)
+                        {        
+                            char testStringChar = test.charAt(indexTestString);
+                            indexTestString++;
+                            for(int i = 0; i < group.length(); i++)
+                            {
+                                if(testStringChar != group.charAt(i))
+                                {
+                                    finished = true;
+                                    indexTestString = testStringStartIndex;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else if(ch == '+')
+                    {
+                        int counter = 0;
+                        boolean finished = false;
+                        while(!finished)
+                        {
+                            //Check if there is input remaining
+                            if(indexTestString < (test.length() - 1))
+                            {
+                                boolean completeMatch = true;
+                                char testStringChar = test.charAt(indexTestString);
+                                indexTestString++;
+                                for(int i = 0; i < group.length(); i++)
+                                {
+                                    if(testStringChar != group.charAt(i))
+                                    {
+                                        finished = true;
+                                        indexTestString = testStringStartIndex;
+                                        completeMatch = false;
+                                        break;
+                                    }
+                                } 
+                                
+                                if(completeMatch)
+                                {
+                                    counter++;
+                                }
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+
+                        if(counter == 0)
+                        {
+                            return false;
+                        }
+                    }
+                    else if(ch == '{')
+                    {
+                        String firstNum = "", secondNum = "";
+                        index++;
+                        char nextCh = regex.charAt(index);
+                        while(nextCh != ',')
+                        {
+                            index++;
+                            firstNum += regex.charAt(index);
+                        }
+
+                        index++;
+                        nextCh = regex.charAt(index);
+                        while(nextCh != '}')
+                        {
+                            index++;
+                            secondNum += regex.charAt(index);
+                        }
+
+                        index++;
+                        int lowerLimit = Integer.parseInt(firstNum);
+                        int upperLimit = Integer.parseInt(secondNum);
+
+                        int counter = 0;
+                        boolean finished = false;
+                        while(!finished)
+                        {
+                            //Check if there is input remaining
+                            if(indexTestString < (test.length() - 1))
+                            {
+                                boolean completeMatch = true;
+                                char testStringChar = test.charAt(indexTestString);
+                                indexTestString++;
+                                for(int i = 0; i < group.length(); i++)
+                                {
+                                    if(testStringChar != group.charAt(i))
+                                    {
+                                        finished = true;
+                                        indexTestString = testStringStartIndex;
+                                        completeMatch = false;
+                                        break;
+                                    }
+                                } 
+                                
+                                if(completeMatch)
+                                {
+                                    counter++;
+                                }
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+
+                        if((counter < lowerLimit) || (counter > upperLimit))
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        //Check if any single character occured
+                        char testStringChar = test.charAt(indexTestString);
+                        indexTestString++;
+                        for(int i = 0; i < group.length(); i++)
+                        {
+                            if(testStringChar != group.charAt(i))
+                            {
+                                return false;
+                            }
+                        }
+
+                        group = "";
+                        index--;
+                    }    
+                }
+                
+            }
+            
             //Direct character match
             else 
             {
@@ -310,6 +479,5 @@ public class RegExEngine extends Thread
     public static void main(String[] args)
     {
         
-    }
-    
+    }   
 }
