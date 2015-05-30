@@ -16,10 +16,11 @@ public class RegExEngine extends Thread
     public boolean parseStringRegexEngine()
     {
         Stack stack = new Stack();
-        boolean characterClass = false;
+        
         //Parse the Regular Expression
         int index = 0;
         int indexTestString = 0;
+        String group = "";
         
         while(index < regex.length())
         {
@@ -59,73 +60,247 @@ public class RegExEngine extends Thread
                 }
             }
             
-            //If start of character class '[' or start of group '('
-            if(ch == '[' || ch == '(')
+            //Character Class checks
+            
+            //If start of character class '['
+            if(ch == '[')
             {
-                characterClass = true;
                 stack.push(index);
                 stack.push('[');
-            }
-            
-            //If end of character class ']' or end of group ')'
-            else if(ch == ']' || ch == ')')
-            {
-                if(stack.empty())
+                
+                //Get all the elements in the character class
+                index++;
+                ch = regex.charAt(index);
+                
+                while(ch != ']')
                 {
-                    System.err.println("Error: Unmatched parenthesis.");
-                    return false;
+                    group += ch;
+                    index++;
+                    ch = regex.charAt(index);
                 }
-                else
+                
+                //Check if there is no input remaing
+                if(index == (regex.length() - 1))
                 {
-                    char c = (char) stack.pop();
-                    if( ((ch == ']') && (c != '[')) || ((ch == ')') && (c != '(')) )
+                    //Check if any single character occured
+                    char testStringChar = test.charAt(indexTestString);
+                    indexTestString++;
+                    for(int i = 0; i < group.length(); i++)
                     {
-                        System.err.println("Error: Unmatched parenthesis.");
-                        return false;
-                    }
-                    
-                    int prevBracketIndex = (int) stack.pop();
-                    
-                    //If there are more characters left to be parsed
-                    if((index+1) < regex.length())
-                    {
-                        //Check if there is any closure symbol onto the whole group
-                        char chNext = regex.charAt(index + 1);
-                        if((chNext == '*') || (chNext == '+') || (chNext == '{'))
+                        if(testStringChar == group.charAt(i))
                         {
-                            index = prevBracketIndex;
-                            stack.push(index);
-                            stack.push('[');
+                            break;
+                        }
+
+                        else if(i == (group.length() - 1))
+                        {
+                            return false;
                         }
                     }
-                    
-                    characterClass = false;
                 }
-            }
-            
-            //If character class
-            else if(characterClass)
-            {
-                //There is only one meta character in a character class i.e. '^'
-                if(ch == '^')
-                {
-                    
-                }
-                
-                //If escape character is used
-                else if(ch == '/')
-                {
-                    
-                }
-                
-                //Treat them as normal characters
                 else
                 {
-                    
+                    //Check if there is closure symbol in the end
+                    index++;
+                    ch = regex.charAt(index);
+                    if(ch == '*')
+                    {
+                        boolean finished = false;
+                        while(!finished)
+                        {
+                            char testStringChar = test.charAt(indexTestString);
+                            indexTestString++;
+                            for(int i = 0; i < group.length(); i++)
+                            {
+                                if(testStringChar == group.charAt(i))
+                                {
+                                    break;
+                                }
+
+                                else if(i == (group.length() - 1))
+                                {
+                                    finished = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else if(ch == '+')
+                    {
+                        int counter = 0;
+                        boolean finished = false;
+                        while(!finished)
+                        {
+                            //Check if there is input remaining
+                            if(indexTestString < (test.length() - 1))
+                            {
+                                char testStringChar = test.charAt(indexTestString);
+                                indexTestString++;
+                                for(int i = 0; i < group.length(); i++)
+                                {
+                                    if(testStringChar == group.charAt(i))
+                                    {
+                                        counter++;
+                                        break;
+                                    }
+
+                                    else if(i == (group.length() - 1))
+                                    {
+                                        finished = true;
+                                        break;
+                                    }
+                                }    
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+
+                        if(counter == 0)
+                        {
+                            return false;
+                        }
+                    }
+                    else if(ch == '{')
+                    {
+                        String firstNum = "", secondNum = "";
+                        index++;
+                        char nextCh = regex.charAt(index);
+                        while(nextCh != ',')
+                        {
+                            index++;
+                            firstNum += regex.charAt(index);
+                        }
+
+                        index++;
+                        nextCh = regex.charAt(index);
+                        while(nextCh != '}')
+                        {
+                            index++;
+                            secondNum += regex.charAt(index);
+                        }
+
+                        index++;
+                        int lowerLimit = Integer.parseInt(firstNum);
+                        int upperLimit = Integer.parseInt(secondNum);
+
+                        int counter = 0;
+                        boolean finished = false;
+                        while(!finished)
+                        {
+                            //Check if there is input remaining
+                            if(indexTestString < (test.length() - 1))
+                            {
+                                char testStringChar = test.charAt(indexTestString);
+                                indexTestString++;
+                                for(int i = 0; i < group.length(); i++)
+                                {
+                                    if(testStringChar == group.charAt(i))
+                                    {
+                                        counter++;
+                                        break;
+                                    }
+
+                                    else if(i == (group.length() - 1))
+                                    {
+                                        finished = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+
+                        if((counter < lowerLimit) || (counter > upperLimit))
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        //Check if any single character occured
+                        char testStringChar = test.charAt(indexTestString);
+                        indexTestString++;
+                        for(int i = 0; i < group.length(); i++)
+                        {
+                            if(testStringChar == group.charAt(i))
+                            {
+                                break;
+                            }
+
+                            else if(i == (group.length() - 1))
+                            {
+                                return false;
+                            }
+                        }
+
+                        group = "";
+                        index--;
+                    }    
                 }
+                
             }
             
-            indexTestString++;
+            //Direct character match
+            else 
+            {
+                while((index < (regex.length() - 1)) && (indexTestString < (test.length() - 1)))
+                {
+                    char testStringChar = test.charAt(indexTestString);
+                    indexTestString++;
+                    char regexChar = regex.charAt(index);
+                    index++;
+                    
+                    if((regexChar == '(') || (regexChar == '['))
+                    {
+                        indexTestString--;
+                        index--;
+                        
+                        break;
+                    }
+                    else
+                    {
+                        char closure = 'E';
+                        //Check if there is closure symbol
+                        if(index < (regex.length() - 1))
+                        {
+                            char nextChar = regex.charAt(index);
+                            if((nextChar == '*') || (nextChar == '+'))
+                            {
+                                closure = regexChar;
+                                index++;
+                            }
+                        }
+                        
+                        //Check if meta characters are used
+                        if(regexChar == '.')
+                        {
+                            //Everything matches '.'
+                            
+                            //Check if closure was used
+                            if(closure != 'E')
+                            {
+                                //Everything will match with .
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            //Check if the literals match
+                            if(regexChar != testStringChar)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                
+            }
+            
             index++;
         }
         

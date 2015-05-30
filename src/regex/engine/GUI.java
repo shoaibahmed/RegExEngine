@@ -5,10 +5,13 @@ import javax.swing.JOptionPane;
 
 public class GUI extends javax.swing.JFrame 
 {
+    RegExEngine engine;
     
     public GUI() 
     {
         initComponents();
+        
+        engine = new RegExEngine();
     }
 
     /**
@@ -23,8 +26,9 @@ public class GUI extends javax.swing.JFrame
         RegexTextField = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         TestButton = new javax.swing.JButton();
-        StringTextField = new javax.swing.JTextField();
+        TestStringTextField = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
+        ResultLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -46,8 +50,10 @@ public class GUI extends javax.swing.JFrame
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(143, 143, 143)
-                        .addComponent(TestButton, javax.swing.GroupLayout.DEFAULT_SIZE, 253, Short.MAX_VALUE))
+                        .addGap(32, 32, 32)
+                        .addComponent(ResultLabel)
+                        .addGap(43, 43, 43)
+                        .addComponent(TestButton, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -55,7 +61,7 @@ public class GUI extends javax.swing.JFrame
                             .addComponent(jLabel2))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(StringTextField, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(TestStringTextField, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(RegexTextField))))
                 .addContainerGap())
         );
@@ -68,10 +74,12 @@ public class GUI extends javax.swing.JFrame
                     .addComponent(jLabel1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(StringTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(TestStringTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
                 .addGap(18, 18, 18)
-                .addComponent(TestButton)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(TestButton)
+                    .addComponent(ResultLabel))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -79,11 +87,17 @@ public class GUI extends javax.swing.JFrame
     }// </editor-fold>//GEN-END:initComponents
 
     private void TestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TestButtonActionPerformed
-        if(RegexTextField.getText().toString().equals("") || StringTextField.getText().toString().equals(""))
+        if(RegexTextField.getText().toString().equals(""))
         {
-            JOptionPane.showMessageDialog(null, "Please fill in the Regex and Test String before proceeding", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Please enter the Regular Expression to be checked", "Error", JOptionPane.ERROR_MESSAGE);
         }
         
+        engine.regex = RegexTextField.getText();
+        engine.test = TestStringTextField.getText();
+        
+        boolean status = engine.parseStringRegexEngine();
+        
+        ResultLabel.setText(String.valueOf(status));
     }//GEN-LAST:event_TestButtonActionPerformed
     
     /**
@@ -123,8 +137,9 @@ public class GUI extends javax.swing.JFrame
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField RegexTextField;
-    private javax.swing.JTextField StringTextField;
+    private javax.swing.JLabel ResultLabel;
     private javax.swing.JButton TestButton;
+    private javax.swing.JTextField TestStringTextField;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     // End of variables declaration//GEN-END:variables
