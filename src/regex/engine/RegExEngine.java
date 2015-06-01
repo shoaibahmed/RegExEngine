@@ -103,20 +103,27 @@ public class RegExEngine extends Thread
                         boolean finished = false;
                         while(!finished)
                         {
-                            char testStringChar = test.charAt(indexTestString);
-                            indexTestString++;
-                            for(int i = 0; i < group.length(); i++)
+                            if(indexTestString < test.length())
                             {
-                                if(testStringChar == group.charAt(i))
+                                char testStringChar = test.charAt(indexTestString);
+                                indexTestString++;
+                                for(int i = 0; i < group.length(); i++)
                                 {
-                                    break;
-                                }
+                                    if(testStringChar == group.charAt(i))
+                                    {
+                                        break;
+                                    }
 
-                                else if(i == (group.length() - 1))
-                                {
-                                    finished = true;
-                                    break;
+                                    else if(i == (group.length() - 1))
+                                    {
+                                        finished = true;
+                                        break;
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                break;
                             }
                         }
                     }
@@ -127,7 +134,7 @@ public class RegExEngine extends Thread
                         while(!finished)
                         {
                             //Check if there is input remaining
-                            if(indexTestString < (test.length() - 1))
+                            if(indexTestString < test.length())
                             {
                                 char testStringChar = test.charAt(indexTestString);
                                 indexTestString++;
@@ -185,7 +192,7 @@ public class RegExEngine extends Thread
                         while(!finished)
                         {
                             //Check if there is input remaining
-                            if(indexTestString < (test.length() - 1))
+                            if(indexTestString < test.length())
                             {
                                 char testStringChar = test.charAt(indexTestString);
                                 indexTestString++;
@@ -237,7 +244,6 @@ public class RegExEngine extends Thread
                         index--;
                     }    
                 }
-                
             }
             
             //Group checks
@@ -257,7 +263,7 @@ public class RegExEngine extends Thread
                 }
                 
                 //Check if there is no input remaing
-                if(index == (regex.length() - 1))
+                if(index == regex.length())
                 {
                     //Check if any single character occured
                     char testStringChar = test.charAt(indexTestString);
@@ -281,17 +287,31 @@ public class RegExEngine extends Thread
                     {
                         boolean finished = false;
                         while(!finished)
-                        {        
-                            char testStringChar = test.charAt(indexTestString);
-                            indexTestString++;
-                            for(int i = 0; i < group.length(); i++)
+                        {
+                            //Check if there is input remaining
+                            if(indexTestString < test.length())
                             {
-                                if(testStringChar != group.charAt(i))
+                                char testStringChar = test.charAt(indexTestString);
+                                indexTestString++;
+                                for(int i = 0; i < group.length(); i++)
                                 {
-                                    finished = true;
-                                    indexTestString = testStringStartIndex;
-                                    break;
+                                    if(testStringChar != group.charAt(i))
+                                    {
+                                        finished = true;
+                                        indexTestString = testStringStartIndex;
+                                        break;
+                                    }
+                                    
+                                    if(indexTestString < test.length())
+                                    {
+                                        testStringChar = test.charAt(indexTestString);
+                                        indexTestString++;
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                break;
                             }
                         }
                     }
@@ -302,7 +322,7 @@ public class RegExEngine extends Thread
                         while(!finished)
                         {
                             //Check if there is input remaining
-                            if(indexTestString < (test.length() - 1))
+                            if(indexTestString < test.length())
                             {
                                 boolean completeMatch = true;
                                 char testStringChar = test.charAt(indexTestString);
@@ -315,6 +335,12 @@ public class RegExEngine extends Thread
                                         indexTestString = testStringStartIndex;
                                         completeMatch = false;
                                         break;
+                                    }
+                                    
+                                    if(indexTestString < test.length())
+                                    {
+                                        testStringChar = test.charAt(indexTestString);
+                                        indexTestString++;
                                     }
                                 } 
                                 
@@ -362,7 +388,7 @@ public class RegExEngine extends Thread
                         while(!finished)
                         {
                             //Check if there is input remaining
-                            if(indexTestString < (test.length() - 1))
+                            if(indexTestString < test.length())
                             {
                                 boolean completeMatch = true;
                                 char testStringChar = test.charAt(indexTestString);
@@ -417,7 +443,7 @@ public class RegExEngine extends Thread
             //Direct character match
             else 
             {
-                while((index < (regex.length() - 1)) && (indexTestString < (test.length() - 1)))
+                while((index < regex.length()) && (indexTestString < test.length()))
                 {
                     char testStringChar = test.charAt(indexTestString);
                     indexTestString++;
