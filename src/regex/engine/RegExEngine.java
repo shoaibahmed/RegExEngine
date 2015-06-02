@@ -117,6 +117,7 @@ public class RegExEngine extends Thread
                                     else if(i == (group.length() - 1))
                                     {
                                         finished = true;
+                                        indexTestString--;
                                         break;
                                     }
                                 }
@@ -149,6 +150,7 @@ public class RegExEngine extends Thread
                                     else if(i == (group.length() - 1))
                                     {
                                         finished = true;
+                                        indexTestString--;
                                         break;
                                     }
                                 }    
@@ -207,6 +209,7 @@ public class RegExEngine extends Thread
                                     else if(i == (group.length() - 1))
                                     {
                                         finished = true;
+                                        indexTestString--;
                                         break;
                                     }
                                 }
@@ -218,6 +221,36 @@ public class RegExEngine extends Thread
                         }
 
                         if((counter < lowerLimit) || (counter > upperLimit))
+                        {
+                            return false;
+                        }
+                    }
+                    else if(ch == '?')
+                    {
+                        if(indexTestString < test.length())
+                        {
+                            char testStringChar = test.charAt(indexTestString);
+                            indexTestString++;
+                            for(int i = 0; i < group.length(); i++)
+                            {
+                                if(testStringChar == group.charAt(i))
+                                {
+                                    break;
+                                }
+                                else if(i == (group.length() - 1))
+                                {
+                                    indexTestString--;
+                                }
+                            }
+                        }
+                    }
+                    else if(ch == '$')
+                    {
+                        if(test.endsWith(group))
+                        {
+                            return true;
+                        }
+                        else
                         {
                             return false;
                         }
@@ -420,6 +453,40 @@ public class RegExEngine extends Thread
                             return false;
                         }
                     }
+                    else if(ch == '?')
+                    {
+                        //Check if there is input remaining
+                        if(indexTestString < test.length())
+                        {
+                            char testStringChar = test.charAt(indexTestString);
+                            indexTestString++;
+                            for(int i = 0; i < group.length(); i++)
+                            {
+                                if(testStringChar != group.charAt(i))
+                                {
+                                    indexTestString = testStringStartIndex;
+                                    break;
+                                }
+
+                                if(indexTestString < test.length())
+                                {
+                                    testStringChar = test.charAt(indexTestString);
+                                    indexTestString++;
+                                }
+                            }
+                        }
+                    }
+                    else if(ch == '$')
+                    {
+                        if(test.endsWith(group))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
                     else
                     {
                         //Check if any single character occured
@@ -499,7 +566,14 @@ public class RegExEngine extends Thread
             index++;
         }
         
-        return true;
+        if(indexTestString != (test.length() - 1))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
     
     public static void main(String[] args)
