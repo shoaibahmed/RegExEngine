@@ -268,16 +268,18 @@ public class RegExEngine extends Thread
                         char nextCh = regex.charAt(index);
                         while(nextCh != ',')
                         {
-                            index++;
                             firstNum += regex.charAt(index);
+                            index++;
+                            nextCh = regex.charAt(index);
                         }
 
                         index++;
                         nextCh = regex.charAt(index);
                         while(nextCh != '}')
                         {
-                            index++;
                             secondNum += regex.charAt(index);
+                            index++;
+                            nextCh = regex.charAt(index);
                         }
 
                         index++;
