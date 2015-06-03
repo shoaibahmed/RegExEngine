@@ -37,7 +37,8 @@ public class RegExEngine extends Thread
             int startingIndex = (int) startingChar - ZERO;
             int endingIndex = (int) endingChar - ZERO;
             
-            for(int index = startingIndex; index <= endingIndex; index++)
+            // + 1 to leave the starting symbol since it was already added in the group
+            for(int index = (startingIndex + 1); index <= endingIndex; index++)
             {
                 result += DIGITS.charAt(index);
             }
@@ -58,9 +59,15 @@ public class RegExEngine extends Thread
                 endingIndex = (int) endingChar - UPPERCASE_A;
             }
             
-            for(int index = startingIndex; index <= endingIndex; index++)
+            // + 1 to leave the starting symbol since it was already added in the group
+            for(int index = (startingIndex + 1); index <= endingIndex; index++)
             {
                 result += CHARACTERS.charAt(index);
+            }
+            
+            if(Character.isLowerCase(startingChar))
+            {
+                result = result.toLowerCase();
             }
         }
         
@@ -151,8 +158,7 @@ public class RegExEngine extends Thread
                         {
                             //Get all the character occurances in between
                             char prevChar = regex.charAt(index - 2);
-                            
-                            getAllCharactersInBetween(prevChar, ch);
+                            group += getAllCharactersInBetween(prevChar, ch);
                         }
                     }
                     else
@@ -213,7 +219,6 @@ public class RegExEngine extends Thread
                             }
                             else
                             {
-                                indexTestString--;
                                 break;
                             }
                         }
@@ -372,7 +377,7 @@ public class RegExEngine extends Thread
             //Group checks
             
             //If start of character class '['
-            if(ch == '(')
+            else if(ch == '(')
             {                
                 //Get all the elements in the character class
                 index++;
@@ -653,10 +658,11 @@ public class RegExEngine extends Thread
                 
             }
             
+            group = "";
             index++;
         }
         
-        if(indexTestString != (test.length() - 1))
+        if(indexTestString != test.length())
         {
             return false;
         }
