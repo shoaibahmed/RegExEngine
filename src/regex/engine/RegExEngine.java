@@ -1,19 +1,73 @@
 package regex.engine;
 
-import java.util.Stack;
-
 public class RegExEngine extends Thread 
 {
     public String regex;
     public String test;
+    
+    public final static String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    public final static String DIGITS = "0123456789";
+    public final static int UPPERCASE_A = 65;
+    public final static int LOWERCASE_A = 97;
+    public final static int ZERO = 48;
 
     @Override
     public void run() 
     {
-        parseStringRegexEngine();
+        parseStringRegexEngine(test);
     }
     
-    public boolean parseStringRegexEngine()
+    public boolean isNullStringAccepted()
+    {
+        return parseStringRegexEngine("");
+    }
+    
+    public boolean isTestStringAccepted()
+    {
+        return parseStringRegexEngine(test);
+    }
+    
+    public String getAllCharactersInBetween(char startingChar, char endingChar)
+    {
+        String result = "";
+        
+        //If number list is required
+        if(Character.isDigit(startingChar))
+        {
+            int startingIndex = (int) startingChar - ZERO;
+            int endingIndex = (int) endingChar - ZERO;
+            
+            for(int index = startingIndex; index <= endingIndex; index++)
+            {
+                result += DIGITS.charAt(index);
+            }
+        }
+        
+        //If Alphabets list is required
+        else
+        {
+            int startingIndex, endingIndex;
+            if(Character.isLowerCase(startingChar))
+            {
+                startingIndex = (int) startingChar - LOWERCASE_A;
+                endingIndex = (int) endingChar - LOWERCASE_A;
+            }
+            else
+            {
+                startingIndex = (int) startingChar - UPPERCASE_A;
+                endingIndex = (int) endingChar - UPPERCASE_A;
+            }
+            
+            for(int index = startingIndex; index <= endingIndex; index++)
+            {
+                result += CHARACTERS.charAt(index);
+            }
+        }
+        
+        return result;
+    }
+    
+    public boolean parseStringRegexEngine(String test)
     {
         //Parse the Regular Expression
         int index = 0;
@@ -69,9 +123,44 @@ public class RegExEngine extends Thread
                 
                 while(ch != ']')
                 {
-                    group += ch;
-                    index++;
-                    ch = regex.charAt(index);
+                    if(ch == '-')
+                    {
+                        index++;
+                        ch = regex.charAt(index);
+                        
+                        //Check if the user used '-' for subtraction
+                        if(ch == '[')
+                        {
+                            String subClass = "";
+                            while(ch != ']')
+                            {
+                                subClass += ch;
+                                index++;
+                                ch = regex.charAt(index);
+                            }
+                            
+                            //Remove the character class from the upper character class
+                            for(int iterator = 0; iterator < subClass.length(); iterator++)
+                            {
+                                String replacer = "";
+                                replacer += subClass.charAt(iterator);
+                                group = group.replaceAll(replacer, "");
+                            }
+                        }
+                        else
+                        {
+                            //Get all the character occurances in between
+                            char prevChar = regex.charAt(index - 2);
+                            
+                            getAllCharactersInBetween(prevChar, ch);
+                        }
+                    }
+                    else
+                    {
+                        group += ch;
+                        index++;
+                        ch = regex.charAt(index);
+                    }
                 }
                 
                 //Check if there is no input remaing
@@ -124,6 +213,7 @@ public class RegExEngine extends Thread
                             }
                             else
                             {
+                                indexTestString--;
                                 break;
                             }
                         }
@@ -578,6 +668,8 @@ public class RegExEngine extends Thread
     
     public static void main(String[] args)
     {
-        
+        RegExEngine regex = new RegExEngine();
+        String res = regex.getAllCharactersInBetween('0', '9');
+        System.out.println(res);
     }   
 }
