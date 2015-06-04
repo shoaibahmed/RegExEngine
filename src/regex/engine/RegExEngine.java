@@ -607,53 +607,176 @@ public class RegExEngine extends Thread
             //Direct character match
             else 
             {
-                while((index < regex.length()) && (indexTestString < test.length()))
+                if(test.equals(""))
                 {
-                    char testStringChar = test.charAt(indexTestString);
-                    indexTestString++;
-                    char regexChar = regex.charAt(index);
-                    index++;
-                    
-                    if((regexChar == '(') || (regexChar == '['))
+                    //Check if there is any optionality
+                    if(!(regex.contains("?") || regex.contains("*")))
                     {
-                        indexTestString--;
-                        index--;
-                        
-                        break;
+                        return false;
                     }
                     else
                     {
-                        char closure = 'E';
-                        //Check if there is closure symbol
-                        if(index < (regex.length() - 1))
+                        //Check if there is any mapping
+                        while(index < regex.length())
                         {
-                            char nextChar = regex.charAt(index);
-                            if((nextChar == '*') || (nextChar == '+'))
+                            char regexChar = regex.charAt(index);
+                            index++;
+                            
+                            char nextCh;
+                            if(index < regex.length())
                             {
-                                closure = regexChar;
-                                index++;
+                                nextCh = regex.charAt(index);
+                                if((nextCh == '?') || (nextCh == '*'))
+                                {
+                                    index++;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                            
+                            //if
+                        }
+                    }
+                }
+                else
+                {
+                    while((index < regex.length()) && (indexTestString < test.length()))
+                    {
+                        char testStringChar = test.charAt(indexTestString);
+                        indexTestString++;
+                        char regexChar = regex.charAt(index);
+                        index++;
+
+                        if((regexChar == '(') || (regexChar == '['))
+                        {
+                            indexTestString--;
+                            index--;
+
+                            break;
+                        }
+                        else
+                        {
+                            char closure = 'E';
+                            //Check if there is closure symbol
+                            if(index < regex.length())
+                            {
+                                char nextChar = regex.charAt(index);
+                                if((nextChar == '*') || (nextChar == '+') || (nextChar == '?'))
+                                {
+                                    closure = nextChar;
+                                    index++;
+                                }
+                            }
+
+                            //Check if meta characters are used
+                            if(regexChar == '.')
+                            {
+                                //Everything matches '.'
+
+                                //Check if closure was used
+                                if((closure != 'E') && (closure != '?'))
+                                {
+                                    //Everything will match with .
+                                    return true;
+                                }
+                            }
+                            else
+                            {
+                                if(closure == '*')
+                                {
+                                    while(regexChar == testStringChar)
+                                    {
+                                        if(indexTestString < test.length())
+                                        {
+                                            testStringChar = test.charAt(indexTestString);
+                                            indexTestString++;
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
+                                    }
+                                }
+                                else if(closure == '+')
+                                {
+                                    boolean symbolNotUtilized = true;
+                                    while(regexChar == testStringChar)
+                                    {
+                                        testStringChar = test.charAt(indexTestString);
+                                        indexTestString++;
+                                        symbolNotUtilized = false;
+                                    }
+
+                                    if(symbolNotUtilized)
+                                    {
+                                        return false;
+                                    }
+                                }
+                                else if(closure == '?')
+                                {
+                                    //Check if the literals match
+                                    if(regexChar != testStringChar)
+                                    {
+                                        indexTestString--;
+                                    }
+                                }
+                                else
+                                {
+                                    //Check if the literals match
+                                    if(regexChar != testStringChar)
+                                    {
+                                        return false;
+                                    }   
+                                }
                             }
                         }
+                    }
+                    
+                    //Check if some regex symbols are remaining
+                    if(index < regex.length())
+                    {
+                        //Take the substring of the remaining characters
+                        String substr = regex.substring(index);
                         
-                        //Check if meta characters are used
-                        if(regexChar == '.')
+                        //Check if the substring contains any optionality
+                        if(!(substr.contains("?") || substr.contains("*")))
                         {
-                            //Everything matches '.'
-                            
-                            //Check if closure was used
-                            if(closure != 'E')
+                            return false;
+                        }
+                        
+                        char regexChar = regex.charAt(index);
+                        char nextChar = '>';
+                        index++;
+                        
+                        if(index < regex.length())
+                        {
+                            nextChar = regex.charAt(index);
+                            index++;
+                        }
+                        
+                        //Check if all the symbols remaining are optional
+                        if((nextChar == '?') || (nextChar == '*'))
+                        {
+                            while((index < regex.length()) && (indexTestString < test.length()))
                             {
-                                //Everything will match with .
-                                return true;
+                                if((nextChar == '?') || (nextChar == '*'))
+                                {
+                                    regexChar = regex.charAt(index);
+                                    index++;
+                                    nextChar = regex.charAt(index);
+                                    index++;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
                             }
                         }
                         else
                         {
-                            //Check if the literals match
-                            if(regexChar != testStringChar)
-                            {
-                                return false;
-                            }
+                            return false;
                         }
                     }
                 }
@@ -664,7 +787,7 @@ public class RegExEngine extends Thread
             index++;
         }
         
-        if(indexTestString != test.length())
+        if((indexTestString != test.length()))
         {
             return false;
         }
