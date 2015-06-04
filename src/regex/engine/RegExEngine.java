@@ -432,7 +432,7 @@ public class RegExEngine extends Thread
                                         break;
                                     }
                                     
-                                    if(indexTestString < test.length())
+                                    if((indexTestString < test.length()) && (i < (group.length() - 1)))
                                     {
                                         testStringChar = test.charAt(indexTestString);
                                         indexTestString++;
@@ -467,7 +467,7 @@ public class RegExEngine extends Thread
                                         break;
                                     }
                                     
-                                    if(indexTestString < test.length())
+                                    if((indexTestString < test.length())  && (i < (group.length() - 1)))
                                     {
                                         testStringChar = test.charAt(indexTestString);
                                         indexTestString++;
