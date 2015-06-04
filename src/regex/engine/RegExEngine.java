@@ -488,6 +488,7 @@ public class RegExEngine extends Thread
                                 
                                 if(completeMatch)
                                 {
+                                    testStringStartIndex = indexTestString;
                                     counter++;
                                 }
                             }
@@ -723,11 +724,12 @@ public class RegExEngine extends Thread
                                     boolean symbolNotUtilized = true;
                                     while(regexChar == testStringChar)
                                     {
+                                        symbolNotUtilized = false;
+                                        
                                         if(indexTestString < test.length())
                                         {
                                             testStringChar = test.charAt(indexTestString);
                                             indexTestString++;
-                                            symbolNotUtilized = false;
                                         }
                                         else
                                         {
