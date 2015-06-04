@@ -169,9 +169,21 @@ public class RegExEngine extends Thread
                     }
                 }
                 
-                //Check if there is no input remaing
+                //Check if there is no items remaining in the regex
                 if(index == (regex.length() - 1))
                 {
+                    //If there is no input remaining as well
+                    if(test.equals(""))
+                    {
+                        return false;
+                    }
+                    
+                    //Check if there is any input remaining
+                    if(indexTestString >= test.length())
+                    {
+                        return false;
+                    }
+                    
                     //Check if any single character occured
                     char testStringChar = test.charAt(indexTestString);
                     indexTestString++;
@@ -467,7 +479,7 @@ public class RegExEngine extends Thread
                                         break;
                                     }
                                     
-                                    if((indexTestString < test.length())  && (i < (group.length() - 1)))
+                                    if((indexTestString < test.length()) && (i < (group.length() - 1)))
                                     {
                                         testStringChar = test.charAt(indexTestString);
                                         indexTestString++;
@@ -565,7 +577,7 @@ public class RegExEngine extends Thread
                                     break;
                                 }
 
-                                if(indexTestString < test.length())
+                                if((indexTestString < test.length())  && (i < (group.length() - 1)))
                                 {
                                     testStringChar = test.charAt(indexTestString);
                                     indexTestString++;
