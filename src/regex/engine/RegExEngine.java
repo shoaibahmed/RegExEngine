@@ -698,8 +698,10 @@ public class RegExEngine extends Thread
                             {
                                 if(closure == '*')
                                 {
+                                    boolean inputSymbolUtilized = false;
                                     while(regexChar == testStringChar)
                                     {
+                                        inputSymbolUtilized = true;
                                         if(indexTestString < test.length())
                                         {
                                             testStringChar = test.charAt(indexTestString);
@@ -710,15 +712,27 @@ public class RegExEngine extends Thread
                                             break;
                                         }
                                     }
+                                    
+                                    if(!inputSymbolUtilized)
+                                    {
+                                        indexTestString--;
+                                    }
                                 }
                                 else if(closure == '+')
                                 {
                                     boolean symbolNotUtilized = true;
                                     while(regexChar == testStringChar)
                                     {
-                                        testStringChar = test.charAt(indexTestString);
-                                        indexTestString++;
-                                        symbolNotUtilized = false;
+                                        if(indexTestString < test.length())
+                                        {
+                                            testStringChar = test.charAt(indexTestString);
+                                            indexTestString++;
+                                            symbolNotUtilized = false;
+                                        }
+                                        else
+                                        {
+                                            break;
+                                        }
                                     }
 
                                     if(symbolNotUtilized)
