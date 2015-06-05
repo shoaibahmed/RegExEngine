@@ -133,7 +133,13 @@ public class GUI extends javax.swing.JFrame
     }//GEN-LAST:event_TestStringButtonActionPerformed
 
     private void GenerateFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_GenerateFileButtonActionPerformed
-        // TODO add your handling code here:
+        if(RegexTextField.getText().toString().equals(""))
+        {
+            JOptionPane.showMessageDialog(null, "Please enter the Regular Expression to be checked", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        engine.regex = RegexTextField.getText();
+        engine.generateFile();
     }//GEN-LAST:event_GenerateFileButtonActionPerformed
     
     /**

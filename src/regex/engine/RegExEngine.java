@@ -1,5 +1,10 @@
 package regex.engine;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Random;
+
 public class RegExEngine extends Thread 
 {
     public String regex;
@@ -10,6 +15,34 @@ public class RegExEngine extends Thread
     public final static int UPPERCASE_A = 65;
     public final static int LOWERCASE_A = 97;
     public final static int ZERO = 48;
+    
+    public final static String FILE_NAME = "List.txt";
+    public final static int REGEX_COMBINATIONS = 10;
+    
+    public void generateFile()
+    {
+        try 
+        {
+            // Assume default encoding.
+            FileWriter fileWriter = new FileWriter(FILE_NAME);
+
+            // Always wrap FileWriter in BufferedWriter.
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+            //bufferedWriter.write("Hello there,");
+            //bufferedWriter.write(" here is some text.");
+            //bufferedWriter.newLine();
+            
+            generateCombinations(bufferedWriter);
+
+            // Always close files.
+            bufferedWriter.close();
+        }
+        catch(IOException ex) 
+        {
+            ex.printStackTrace();
+        }
+    }
 
     @Override
     public void run() 
@@ -825,10 +858,368 @@ public class RegExEngine extends Thread
         }
     }
     
+    public void generateCombinations(BufferedWriter writer)
+    {
+        Random randomNoGenerator = new Random();
+        
+        boolean useOptionality = true;
+        for(int iterator = 0; iterator < REGEX_COMBINATIONS; iterator++)
+        {
+            useOptionality = !useOptionality;
+            
+            //Parse the Regular Expression
+            int index = 0;
+            String group = "";
+            String resultantString = "";
+            
+            while(index < regex.length())
+            {
+                char ch = regex.charAt(index);
+
+                //Check if the test string starts with the specified sequence
+                if((index == 0) && (ch == '^'))
+                {
+                    char nextCh = regex.charAt(index + 1);
+
+                    if(nextCh == '(')
+                    {
+                        String startString = "";
+                        index++;
+                        nextCh = regex.charAt(index + 1);
+                        while(nextCh != ')')
+                        {
+                            startString += nextCh;
+                            index++;
+                            nextCh = regex.charAt(index + 1);
+                        }
+
+                        resultantString += startString;
+                    }
+                    else
+                    {
+                        resultantString += ch;
+                    }
+                }
+
+                //Character Class checks
+
+                //If start of character class '['
+                if(ch == '[')
+                {                
+                    //Get all the elements in the character class
+                    index++;
+                    ch = regex.charAt(index);
+
+                    while(ch != ']')
+                    {
+                        if(ch == '-')
+                        {
+                            index++;
+                            ch = regex.charAt(index);
+
+                            //Check if the user used '-' for subtraction
+                            if(ch == '[')
+                            {
+                                String subClass = "";
+                                while(ch != ']')
+                                {
+                                    subClass += ch;
+                                    index++;
+                                    ch = regex.charAt(index);
+                                }
+
+                                //Remove the character class from the upper character class
+                                for(int iter = 0; iter < subClass.length(); iter++)
+                                {
+                                    String replacer = "";
+                                    replacer += subClass.charAt(iter);
+                                    group = group.replaceAll(replacer, "");
+                                }
+                            }
+                            else
+                            {
+                                //Get all the character occurances in between
+                                char prevChar = regex.charAt(index - 2);
+                                group += getAllCharactersInBetween(prevChar, ch);
+                            }
+                        }
+                        else
+                        {
+                            group += ch;
+                            index++;
+                            ch = regex.charAt(index);
+                        }
+                    }
+
+                    //Check if there is no items remaining in the regex
+                    if(index == (regex.length() - 1))
+                    {
+                        //Pick one random character from the character class
+                        int randomIndex = randomNoGenerator.nextInt(group.length());
+                        resultantString += group.charAt(randomIndex);
+                    }
+                    else
+                    {
+                        //Check if there is closure symbol in the end
+                        index++;
+                        ch = regex.charAt(index);
+                        if(ch == '*')
+                        {
+                            for(int i = 0; i < iterator; i++)
+                            {
+                                //Pick one random character from the character class
+                                int randomIndex = randomNoGenerator.nextInt(group.length());
+                                resultantString += group.charAt(randomIndex);
+                            }
+                        }
+                        else if(ch == '+')
+                        {
+                            for(int i = 0; i <= iterator; i++)
+                            {
+                                //Pick one random character from the character class
+                                int randomIndex = randomNoGenerator.nextInt(group.length());
+                                resultantString += group.charAt(randomIndex);
+                            }
+                        }
+                        else if(ch == '{')
+                        {
+                            String firstNum = "", secondNum = "";
+                            index++;
+                            char nextCh = regex.charAt(index);
+                            while(nextCh != ',')
+                            {
+                                firstNum += regex.charAt(index);
+                                index++;
+                                nextCh = regex.charAt(index);
+                            }
+
+                            index++;
+                            nextCh = regex.charAt(index);
+                            while(nextCh != '}')
+                            {
+                                secondNum += regex.charAt(index);
+                                index++;
+                                nextCh = regex.charAt(index);
+                            }
+
+                            index++;
+                            int lowerLimit = Integer.parseInt(firstNum);
+                            int upperLimit = Integer.parseInt(secondNum);
+
+                            int randomCounter = randomNoGenerator.nextInt(upperLimit - lowerLimit) + lowerLimit;
+                            for(int i = 0; i <= randomCounter; i++)
+                            {
+                                //Pick one random character from the character class
+                                int randomIndex = randomNoGenerator.nextInt(group.length());
+                                resultantString += group.charAt(randomIndex);
+                            }
+                        }
+                        else if(ch == '?')
+                        {
+                            if(useOptionality)
+                            {
+                                //Pick one random character from the character class
+                                int randomIndex = randomNoGenerator.nextInt(group.length());
+                                resultantString += group.charAt(randomIndex);
+                            }
+                        }
+                        else if(ch == '$')
+                        {
+                            //Pick one random character from the character class
+                            int randomIndex = randomNoGenerator.nextInt(group.length());
+                            resultantString += group.charAt(randomIndex);
+                        }
+                        else
+                        {
+                            //Pick one random character from the character class
+                            int randomIndex = randomNoGenerator.nextInt(group.length());
+                            resultantString += group.charAt(randomIndex);
+                        }    
+                    }
+                }
+
+                //Group checks
+
+                //If start of character class '['
+                else if(ch == '(')
+                {                
+                    //Get all the elements in the character class
+                    index++;
+                    ch = regex.charAt(index);
+
+                    while(ch != ')')
+                    {
+                        group += ch;
+                        index++;
+                        ch = regex.charAt(index);
+                    }
+
+                    //Check if there is no input remaing
+                    if(index == regex.length())
+                    {
+                        resultantString += group;
+                    }
+                    else
+                    {
+                        //Check if there is closure symbol in the end
+                        index++;
+                        ch = regex.charAt(index);
+
+                        if(ch == '*')
+                        {
+                            for(int i = 0; i < iterator; i++)
+                            {
+                                resultantString += group;
+                            }
+                        }
+                        else if(ch == '+')
+                        {
+                            for(int i = 0; i <= iterator; i++)
+                            {
+                                resultantString += group;
+                            }
+                        }
+                        else if(ch == '{')
+                        {
+                            String firstNum = "", secondNum = "";
+                            index++;
+                            char nextCh = regex.charAt(index);
+                            while(nextCh != ',')
+                            {
+                                index++;
+                                firstNum += regex.charAt(index);
+                            }
+
+                            index++;
+                            nextCh = regex.charAt(index);
+                            while(nextCh != '}')
+                            {
+                                index++;
+                                secondNum += regex.charAt(index);
+                            }
+
+                            index++;
+                            int lowerLimit = Integer.parseInt(firstNum);
+                            int upperLimit = Integer.parseInt(secondNum);
+
+                            int randomCounter = randomNoGenerator.nextInt(upperLimit - lowerLimit) + lowerLimit;
+                            for(int i = 0; i <= randomCounter; i++)
+                            {
+                                resultantString += group;
+                            }
+                        }
+                        else if(ch == '?')
+                        {
+                            if(useOptionality)
+                            {
+                                resultantString += group;
+                            }
+                        }
+                        else if(ch == '$')
+                        {
+                            resultantString += group;
+                        }
+                        else
+                        {
+                            resultantString += group;
+                        }    
+                    }
+
+                }
+
+                //Direct character match
+                else 
+                {
+                    while(index < regex.length())
+                    {
+                        char regexChar = regex.charAt(index);
+                        index++;
+
+                        if((regexChar == '(') || (regexChar == '['))
+                        {
+                            index--;
+                            break;
+                        }
+                        else
+                        {
+                            char closure = 'E';
+                            //Check if there is closure symbol
+                            if(index < regex.length())
+                            {
+                                char nextChar = regex.charAt(index);
+                                if((nextChar == '*') || (nextChar == '+') || (nextChar == '?'))
+                                {
+                                    closure = nextChar;
+                                    index++;
+                                }
+                            }
+
+                            //Check if meta characters are used
+                            if(regexChar == '.')
+                            {
+                                //Everything matches '.'
+
+                                //Check if closure was used
+                                if((closure != 'E') && (closure != '?'))
+                                {
+                                    //Anything can be added since '.' is present
+                                    resultantString += '0';
+                                }
+                            }
+                            else
+                            {
+                                if(closure == '*')
+                                {
+                                    for(int i = 0; i < iterator; i++)
+                                    {
+                                        resultantString += regexChar;
+                                    }
+                                }
+                                else if(closure == '+')
+                                {
+                                    for(int i = 0; i <= iterator; i++)
+                                    {
+                                        resultantString += regexChar;
+                                    }
+                                }
+                                else if(closure == '?')
+                                {
+                                    if(useOptionality)
+                                    {
+                                        resultantString += regexChar;
+                                    }
+                                }
+                                else
+                                {
+                                    resultantString += regexChar;
+                                }
+                            }
+                        }
+
+                    }
+
+                }
+
+                group = "";
+                index++;
+            }
+            
+            try
+            {
+                writer.write(resultantString);
+                writer.newLine();
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+    
     public static void main(String[] args)
     {
         RegExEngine regex = new RegExEngine();
-        String res = regex.getAllCharactersInBetween('0', '9');
-        System.out.println(res);
+        regex.regex = "a+bc";
+        regex.generateFile();
     }   
 }
