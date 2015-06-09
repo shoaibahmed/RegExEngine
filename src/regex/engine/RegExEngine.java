@@ -693,17 +693,18 @@ public class RegExEngine extends Thread
                         char testStringChar = test.charAt(indexTestString);
                         indexTestString++;
                         char regexChar = regex.charAt(index);
-                        index++;
-
+                        
                         if((regexChar == '(') || (regexChar == '['))
                         {
                             indexTestString--;
                             index--;
+                            //continue;
 
                             break;
                         }
                         else
                         {
+                            index++;
                             char closure = 'E';
                             //Check if there is closure symbol
                             if(index < regex.length())
@@ -811,51 +812,55 @@ public class RegExEngine extends Thread
                         }
                     }
                     
-                    //Check if some regex symbols are remaining
-                    if(index < regex.length())
+                    if(test.equals("") || (test.length() < indexTestString))
                     {
-                        //Take the substring of the remaining characters
-                        String substr = regex.substring(index);
-                        
-                        //Check if the substring contains any optionality
-                        if(!(substr.contains("?") || substr.contains("*")))
-                        {
-                            return false;
-                        }
-                        
-                        char regexChar = regex.charAt(index);
-                        char nextChar = '>';
-                        index++;
-                        
+                        //Check if some regex symbols are remaining
                         if(index < regex.length())
                         {
-                            nextChar = regex.charAt(index);
-                            index++;
-                        }
-                        
-                        //Check if all the symbols remaining are optional
-                        if((nextChar == '?') || (nextChar == '*'))
-                        {
-                            while((index < regex.length()) && (indexTestString < test.length()))
+                            //Take the substring of the remaining characters
+                            String substr = regex.substring(index);
+
+                            //Check if the substring contains any optionality
+                            if(!(substr.contains("?") || substr.contains("*")))
                             {
-                                if((nextChar == '?') || (nextChar == '*'))
+                                return false;
+                            }
+
+                            char regexChar = regex.charAt(index);
+                            char nextChar = '>';
+                            index++;
+
+                            if(index < regex.length())
+                            {
+                                nextChar = regex.charAt(index);
+                                index++;
+                            }
+
+                            //Check if all the symbols remaining are optional
+                            if((nextChar == '?') || (nextChar == '*'))
+                            {
+                                while((index < regex.length()) && (indexTestString < test.length()))
                                 {
-                                    regexChar = regex.charAt(index);
-                                    index++;
-                                    nextChar = regex.charAt(index);
-                                    index++;
-                                }
-                                else
-                                {
-                                    return false;
+                                    if((nextChar == '?') || (nextChar == '*'))
+                                    {
+                                        regexChar = regex.charAt(index);
+                                        index++;
+                                        nextChar = regex.charAt(index);
+                                        index++;
+                                    }
+                                    else
+                                    {
+                                        return false;
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            return false;
+                            else
+                            {
+                                return false;
+                            }
                         }
                     }
+                    
                 }
                 
             }
