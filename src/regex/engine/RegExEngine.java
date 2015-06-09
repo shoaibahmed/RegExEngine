@@ -17,7 +17,7 @@ public class RegExEngine extends Thread
     public final static int ZERO = 48;
     
     public final static String FILE_NAME = "List.txt";
-    public final static int REGEX_COMBINATIONS = 10;
+    public final static int REGEX_COMBINATIONS_LENGTH = 10;
     
     public void generateFile()
     {
@@ -733,6 +733,8 @@ public class RegExEngine extends Thread
                                 if(closure == '*')
                                 {
                                     boolean inputSymbolUtilized = false;
+                                    boolean incremented = false;
+                                    
                                     while(regexChar == testStringChar)
                                     {
                                         inputSymbolUtilized = true;
@@ -740,6 +742,7 @@ public class RegExEngine extends Thread
                                         {
                                             testStringChar = test.charAt(indexTestString);
                                             indexTestString++;
+                                            incremented = true;
                                         }
                                         else
                                         {
@@ -751,10 +754,17 @@ public class RegExEngine extends Thread
                                     {
                                         indexTestString--;
                                     }
+                                    
+                                    if(incremented)
+                                    {
+                                        indexTestString--;
+                                    }
                                 }
                                 else if(closure == '+')
                                 {
                                     boolean symbolNotUtilized = true;
+                                    boolean incremented = false;
+                                    
                                     while(regexChar == testStringChar)
                                     {
                                         symbolNotUtilized = false;
@@ -763,6 +773,7 @@ public class RegExEngine extends Thread
                                         {
                                             testStringChar = test.charAt(indexTestString);
                                             indexTestString++;
+                                            incremented = true;
                                         }
                                         else
                                         {
@@ -773,6 +784,11 @@ public class RegExEngine extends Thread
                                     if(symbolNotUtilized)
                                     {
                                         return false;
+                                    }
+                                    
+                                    if(incremented)
+                                    {
+                                        indexTestString--;
                                     }
                                 }
                                 else if(closure == '?')
@@ -863,7 +879,9 @@ public class RegExEngine extends Thread
         Random randomNoGenerator = new Random();
         
         boolean useOptionality = true;
-        for(int iterator = 0; iterator < REGEX_COMBINATIONS; iterator++)
+        int iterator = 0;
+        //for(int iterator = 0; iterator < REGEX_COMBINATIONS; iterator++)
+        while(true)
         {
             useOptionality = !useOptionality;
             
@@ -1212,6 +1230,14 @@ public class RegExEngine extends Thread
             catch(Exception e)
             {
                 e.printStackTrace();
+            }
+            
+            iterator++;
+            
+            //If the requried number of combinations are generated
+            if(resultantString.length() >= REGEX_COMBINATIONS_LENGTH)
+            {
+                break;
             }
         }
     }
